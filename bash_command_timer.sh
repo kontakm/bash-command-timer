@@ -59,7 +59,7 @@ BCT_ERROR_COLOR='91'
 # pattern.
 #
 # If empty, disables printing of current time.
-BCT_TIME_FORMAT='%b %d %I:%M%p'
+BCT_TIME_FORMAT='%Y-%m-%dT%H:%M:%S%z'
 
 # Whether to print command timings up to millisecond precision.
 #
