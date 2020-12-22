@@ -1,3 +1,4 @@
+#!/bin/bash
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #
 #    Copyright (C) 2014-2020 Chuan Ji <chuan@jichu4n.com>                     #
@@ -128,7 +129,7 @@ function BCTPreCommand() {
     return
   fi
   unset BCT_AT_PROMPT
-  BCT_COMMAND_START_TIME=$(eval $BCTTime)
+  BCT_COMMAND_START_TIME=$(eval "$BCTTime")
 }
 
 
@@ -153,19 +154,20 @@ function BCTPostCommand() {
 
   # BCTTime prints out time in nanoseconds.
   local MSEC=1000000
-  local SEC=$(($MSEC * 1000))
-  local MIN=$((60 * $SEC))
-  local HOUR=$((60 * $MIN))
-  local DAY=$((24 * $HOUR))
+  local SEC=$((MSEC * 1000))
+  local MIN=$((60 * SEC))
+  local HOUR=$((60 * MIN))
+  local DAY=$((24 * HOUR))
 
   local command_start_time=$BCT_COMMAND_START_TIME
-  local command_end_time=$(eval $BCTTime)
-  local command_time=$(($command_end_time - $command_start_time))
-  local num_days=$(($command_time / $DAY))
-  local num_hours=$(($command_time % $DAY / $HOUR))
-  local num_mins=$(($command_time % $HOUR / $MIN))
-  local num_secs=$(($command_time % $MIN / $SEC))
-  local num_msecs=$(($command_time % $SEC / $MSEC))
+  local command_end_time
+  command_end_time=$(eval "$BCTTime")
+  local command_time=$((command_end_time - command_start_time))
+  local num_days=$((command_time / DAY))
+  local num_hours=$((command_time % DAY / HOUR))
+  local num_mins=$((command_time % HOUR / MIN))
+  local num_secs=$((command_time % MIN / SEC))
+  local num_msecs=$((command_time % SEC / MSEC))
   local time_str=""
   if [ $num_days -gt 0 ]; then
     time_str="${time_str}${num_days}d "
@@ -178,10 +180,11 @@ function BCTPostCommand() {
   fi
   local num_msecs_pretty=''
   if [ -n "$BCT_MILLIS" ] && [ $BCT_MILLIS -eq 1 ]; then
-    local num_msecs_pretty=$(printf '%03d' $num_msecs)
+    local num_msecs_pretty
+    num_msecs_pretty=$(printf '%03d' $num_msecs)
   fi
   time_str="${time_str}${num_secs}s${num_msecs_pretty}"
-  now_str=$(BCTPrintTime $(($command_end_time / $SEC)))
+  now_str=$(BCTPrintTime $((command_end_time / SEC)))
   if [ -n "$now_str" ]; then
     local output_str="[ $time_str | $now_str ]"
   else
@@ -231,13 +234,13 @@ function BCTRegisterCallbacksDirectly() {
   PROMPT_COMMAND='BCTPostCommand'
 }
 # Case 1: User-supplied path via BASH_PREEXEC_LOCATION
-if ! [ -z "$BASH_PREEXEC_LOCATION" ] && [ -f "$BASH_PREEXEC_LOCATION" ]; then
+if [ -n "$BASH_PREEXEC_LOCATION" ] && [ -f "$BASH_PREEXEC_LOCATION" ]; then
   BCTRegisterCallbacksWithBashPreexec "$BASH_PREEXEC_LOCATION"
 # Case 2: Common installation locations
 elif [ -f '/usr/share/bash-preexec/bash-preexec.sh' ]; then 
   BCTRegisterCallbacksWithBashPreexec '/usr/share/bash-preexec/bash-preexec.sh'
-elif [ -f '~/.bash-preexec.sh' ]; then 
-  BCTRegisterCallbacksWithBashPreexec '~/.bash-preexec.sh'
+elif [ -f "$HOME""/.bash-preexec.sh" ]; then 
+  BCTRegisterCallbacksWithBashPreexec "$HOME""/.bash-preexec.sh"
 # Case 3: bash-preexec not found
 else 
   BCTRegisterCallbacksDirectly
